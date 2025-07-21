@@ -1,0 +1,14 @@
+https://cprss.s3.amazonaws.com/javascriptweekly.com.xml  
+https://devblogs.microsoft.com/typescript/feed/  
+https://nodejs.org/en/feed/blog.xml  
+https://react.dev/rss.xml  
+https://go.dev/blog/feed.atom  
+https://blog.python.org/feeds/posts/default  
+https://blog.rust-lang.org/feed.xml  
+https://www.docker.com/feed/  
+https://css-tricks.com/feed/  
+https://www.smashingmagazine.com/feed/  
+https://web.dev/static/blog/feed.xml  
+https://developer.mozilla.org/en-US/blog/rss.xml  
+https://aws.amazon.com/blogs/aws/feed/  
+https://martinfowler.com/feed.atom  

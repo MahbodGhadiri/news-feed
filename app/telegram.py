@@ -10,10 +10,11 @@ def escape_markdown_v2(text):
     special_chars = r"_*[]()~`>#+-=|{}.!\\"
     return re.sub(rf"([{re.escape(special_chars)}])", r"\\\1", text)
 
-def format_article_md2(headline):
+def format_article_md2(headline, tag):
     """Formats a single article dictionary to Telegram MarkdownV2 format."""
     title = escape_markdown_v2(headline["title"])
     summary = escape_markdown_v2(headline["summary"])
+    tag = escape_markdown_v2(f"#{tag}")
     
     # Handle one or more sources (list or single string)
     sources = headline.get("sources", [])
@@ -35,15 +36,16 @@ def format_article_md2(headline):
 *Summary:* {summary}
 
 *Source:* {sources_text}
+
+ {tag}
 """
 
 
-def send_to_telegram(headline, chat_id=-1002621988066):
+def send_to_telegram(headline, topic, chat_id=-1002621988066):
     bot_token = os.environ.get("TELEGRAM_TOKEN")
 
 
-    final_text = format_article_md2(headline)
-    print(final_text)
+    final_text = format_article_md2(headline, tag=topic)
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {

@@ -1,0 +1,8 @@
+https://www.euronews.com/rss?format=mrss&level=theme&name=sport  
+https://www.espn.com/espn/rss/soccer/news  
+https://www.nytimes.com/athletic/rss/soccer/  
+https://feeds.bbci.co.uk/sport/football/rss.xml  
+https://www.bundesliga.com/rss/en/rss-news.rss  
+https://e00-marca.uecdn.es/rss/futbol/primera-division.xml  
+https://www.transfermarkt.com/rss/news  
+https://www.sofascore.com/news/feed/ 

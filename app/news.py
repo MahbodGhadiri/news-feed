@@ -7,7 +7,6 @@ from datetime import timedelta
 import random
 
 # ---------- CONFIG ----------
-RSS_FILE = "rss-feed.txt"
 MAX_ARTICLES = 10 
 KEYWORDS = [
     # EU Politics
@@ -101,8 +100,8 @@ KEYWORDS = [
 
 
 class NewsAggregator:
-    def __init__(self):
-        urls = self.load_rss_urls(RSS_FILE)
+    def __init__(self, file):
+        urls = self.load_rss_urls(file)
         self.entries = self.fetch_entries(urls)
 
     def load_rss_urls(self, file_path):
