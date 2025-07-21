@@ -112,6 +112,7 @@ class NewsAggregator:
         """Fetch all articles from the list of feeds."""
         all_entries = []
         for url in urls:
+            print(f"fetching {url} ...")
             feed = feedparser.parse(url)
             for entry in feed.entries:
                 published = entry.get("published", "") or entry.get("updated", "")
