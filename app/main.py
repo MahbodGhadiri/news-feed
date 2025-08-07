@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from app.logger import setup_logger
 from app.jobs.news import NewsAggregator
+from app.jobs.ukraine import UkraineSummary
 import asyncio
 
 load_dotenv()
@@ -72,11 +73,14 @@ async def start_scheduler():
         max_age_hours=24,
     )  # every day
 
+    ukraine_summary_job = UkraineSummary("* 7 * * *", "Ukraine War Tracker")
+
     asyncio.create_task(general_news_job.start())
     asyncio.create_task(sport_news_job.start())
     asyncio.create_task(defense_news_job.start())
     asyncio.create_task(environment_news_job.start())
     asyncio.create_task(tech_news_job.start())
     asyncio.create_task(programming_news_job.start())
+    asyncio.create_task(ukraine_summary_job.start())
 
     logger.info("✅ All jobs scheduled with staggered times.")

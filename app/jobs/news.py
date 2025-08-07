@@ -1,8 +1,7 @@
 from app.jobs.base import AbstractCronJob
-from app.ai import generate
+from app.ai import GeminiClient
 from app.telegram import send_to_telegram
-import json
-from app.news import NewsAggregator
+from app.news import NewsAggregatorTool
 
 
 class NewsAggregator(AbstractCronJob):
@@ -31,7 +30,7 @@ class NewsAggregator(AbstractCronJob):
             self.logger.info(
                 f"⏳ Task started - aggregate {self.topic} news - max_age: {self.max_age_hours} hours and max_articles: {self.max_articles}"
             )
-            aggregator = NewsAggregator(f"app/rss-feed/{self.topic}.txt")
+            aggregator = NewsAggregatorTool(f"app/rss-feed/{self.topic}.txt")
             aggregator.filter_recent(
                 self.max_age_hours
             ).filter_summary().filter_duplicates()
@@ -47,9 +46,9 @@ class NewsAggregator(AbstractCronJob):
 
             summary_input = aggregator.summarize_prep()
 
-            summary_json = generate(summary_input)
+            llm_client = GeminiClient()
 
-            headlines = json.loads(summary_json)["articles"]
+            headlines = llm_client.generate(summary_input)["articles"]
 
             for headline in headlines:
                 try:

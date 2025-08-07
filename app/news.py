@@ -316,7 +316,7 @@ KEYWORDS = [
 # ----------------------------
 
 
-class NewsAggregator:
+class NewsAggregatorTool:
     def __init__(self, file):
         self.logger = setup_logger(__name__)
         urls = self.load_rss_urls(file)
