@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
+import time
+from fastapi.responses import JSONResponse
+from fastapi import Request
 from app.logger import setup_logger
 from app.jobs.news import NewsAggregator
 from app.jobs.ukraine import UkraineSummary
@@ -8,7 +11,34 @@ import asyncio
 load_dotenv()
 logger = setup_logger(__name__)
 
+start_time = time.time()
+
 app = FastAPI()
+
+def format_uptime(seconds: float) -> str:
+    if seconds < 5:
+        return "just now"
+    elif seconds < 60:
+        return f"{int(seconds)} seconds"
+    elif seconds < 3600:
+        return f"{int(seconds // 60)} minutes"
+    else:
+        return f"{int(seconds // 3600)} hours"
+
+
+@app.get("/health")
+async def health_check(request: Request):
+    uptime_seconds = time.time() - start_time
+    formatted_uptime = format_uptime(uptime_seconds)
+
+    health_data = {
+        "status": 200,
+        "uptime": formatted_uptime,
+        "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "message": "🟢 NewsFeed Bot is running.",
+    }
+
+    return JSONResponse(status_code=200, content=health_data)
 
 
 @app.on_event("startup")

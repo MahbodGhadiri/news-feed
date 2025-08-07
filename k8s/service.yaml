@@ -1,0 +1,16 @@
+# k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: news-feed-service
+  namespace: drone-builds
+  labels:
+    app: news-feed
+spec:
+  selector:
+    app: news-feed
+  ports:
+    - port: 80
+      targetPort: 8000
+      name: http
+  type: ClusterIP

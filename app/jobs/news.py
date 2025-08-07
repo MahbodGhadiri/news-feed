@@ -52,9 +52,7 @@ class NewsAggregator(AbstractCronJob):
 
             for headline in headlines:
                 try:
-                    self.logger.info(f"sending to telegram")
-                    res = send_to_telegram(headline, self.topic)
-                    self.logger.info(res)
+                    send_to_telegram(headline, self.topic)
                 except Exception as e:
                     self.logger.error("failed to send article")
                     self.logger.error(e)

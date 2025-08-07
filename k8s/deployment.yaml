@@ -1,0 +1,45 @@
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-feed-deployment
+  namespace: drone-builds
+  labels:
+    app: news-feed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: news-feed
+  template:
+    metadata:
+      labels:
+        app: news-feed
+    spec:
+      containers:
+        - name: news-feed
+          image: mahbodghadiri/news-feed:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: news-feed-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
