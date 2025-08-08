@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from croniter import croniter
 from datetime import datetime, timezone
 import asyncio
-from app.logger import setup_logger
+from app.utils.logger import setup_logger
 
 
 class AbstractCronJob(ABC):

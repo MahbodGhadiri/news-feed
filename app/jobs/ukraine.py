@@ -1,18 +1,21 @@
 from app.jobs.base import AbstractCronJob
+from app.db.article_service import ArticleService
 from app.scrapers.isw import ISWReportScraper
-from app.ai import GeminiClient
-from app.telegram import send_to_telegram
+from app.utils.ai import GeminiClient
+from app.utils.telegram import send_to_telegram
 from google.genai import types
 
 
 class UkraineSummary(AbstractCronJob):
     def __init__(
         self,
+        article_service: ArticleService,
         cron_expression: str,
         job_name: str,
     ):
         super().__init__(cron_expression, job_name)
         self.topic = "ukraine_war_daily_update"
+        self.article_service = article_service
 
     async def run(self):
         scraper = ISWReportScraper()
@@ -34,7 +37,6 @@ class UkraineSummary(AbstractCronJob):
                 "       • `air_war`: string",
                 "       • `changes_on_ground`: string",
                 "       • `other` (optional): string for miscellaneous updates",
-                "   - `source`: Always set to 'ISW'",
                 "All fields must be in English. Keep language clear and suitable for public audiences.",
             ],
             response_schema=types.Schema(
@@ -68,7 +70,6 @@ class UkraineSummary(AbstractCronJob):
                                     "other": types.Schema(type=types.Type.STRING),
                                 },
                             ),
-                            "source": types.Schema(type=types.Type.STRING),
                         },
                     )
                 },
@@ -80,13 +81,19 @@ class UkraineSummary(AbstractCronJob):
             return
 
         body_sections = []
-        for section_name, content in article["body"].items():
+        for _, content in article["body"].items():
             body_sections.append(content)
 
         # Create the result dictionary
         headline = {
             "title": article["title"],
-            "sources": [article["source"]],
+            "sources": [scraper.get_source()],
             "summary": "\n" + "\n\n".join(body_sections),
         }
+        self.article_service.create_article(
+            headline["title"],
+            headline["summary"],
+            scraper.get_source(),
+            sent_to_telegram=True,
+        )
         send_to_telegram(headline, self.topic)

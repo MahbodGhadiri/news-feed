@@ -141,3 +141,6 @@ class ISWReportScraper:
         self.extract_metadata()
         self.extract_sections()
         return self.prep_summary()
+
+    def get_source(self):
+        return self.url

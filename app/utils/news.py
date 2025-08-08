@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil import parser as date_parser
 from collections import defaultdict
 from datetime import timedelta
-from app.logger import setup_logger
+from app.utils.logger import setup_logger
 import random
 
 # ---------- CONFIG ----------
@@ -404,16 +404,16 @@ class NewsAggregatorTool:
         return self
 
     def shuffle_and_slice(self, total_limit=MAX_ARTICLES):
-        while len(self.entries) < total_limit:
-            total_limit -= 3
+        while len(self.entries) <= total_limit:
+            total_limit -= 1
 
         random.shuffle(self.entries)
         self.entries = self.entries[:total_limit]
         return self
 
     def weighted_selection(self, total_limit=MAX_ARTICLES * 2):
-        while total_limit >= len(self.entries):
-            total_limit = len(self.entries) - 3
+        if total_limit >= len(self.entries):
+            return self
 
         now = datetime.now()
         weighted_entries = []
