@@ -4,8 +4,10 @@ from fastapi.responses import JSONResponse
 
 # ----------------- Third Parties -------------------------
 import time
+from datetime import datetime, timezone
 
 # ---------------- Internals ------------------------------
+from app.metrics.cronjob import get_metrics
 
 start_time = time.time()
 
@@ -36,3 +38,14 @@ async def health_check(request: Request):
     }
 
     return JSONResponse(status_code=200, content=health_data)
+
+
+@router.get("/cron-health")
+async def cron_health():
+    """Cron jobs health check endpoint"""
+    metrics = get_metrics()
+    return {
+        "status": "healthy",
+        "active_jobs": metrics.get_active_jobs_count(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }

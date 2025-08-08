@@ -19,7 +19,7 @@ from app.jobs.ukraine import UkraineSummary
 from app.db.base_service import BaseDatabaseService
 from app.db.article_service import ArticleService
 
-from app.api import health, rss
+from app.api import health, rss, metrics
 
 # --------------------------------------------------------
 
@@ -30,6 +30,7 @@ logger = setup_logger(__name__)
 app = FastAPI()
 app.include_router(rss.router)
 app.include_router(health.router)
+app.include_router(metrics.router)
 
 
 @app.on_event("startup")
