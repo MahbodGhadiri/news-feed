@@ -28,15 +28,20 @@ class GeminiClient:
             instruction = [instruction]
         return [types.Part.from_text(text=inst) for inst in instruction]
 
-    def _default_instruction(self) -> str:
-        return """You will be provided with some news that I have collected from RSS feeds and have formatted them. Provide them as a news feed to me. Write comprehensive paragraphs if you can expand on it. Make sure the feed is in English. Provide the news in a consistent format and include sources. The format should be as follows:
+    def _default_instruction(self) -> List[str]:
+        return [
+            "You will be provided with a collection of news items formatted from RSS feeds.",
+            "Your task is to summarize and polish the content you receive. Do not add or invent any new information.",
+            "All output must be in English.",
+            "The output should be in JSON format. Return an array of articles, where each article has the following fields:",
+            "- title (string): a clear and concise English title.",
+            "- summary (string): a polished and accurate English summary of the original content.",
+            "- sources (array of strings): valid links to the original news sources.",
+            "Only include articles that contain at least one valid source link. If an article does not contain a valid link, ignore it.",
+            "Write comprehensive summaries when possible, but do not include information not present in the input.",
+            "Ensure consistency and clarity throughout the output."
+        ]
 
-Use JSON. Each article has 3 fields: 
-- title (string)
-- summary (string)
-- sources (array of strings). 
-
-You should return an array of articles."""
 
     def _default_schema(self) -> genai.types.Schema:
         return genai.types.Schema(
