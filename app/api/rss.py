@@ -35,9 +35,9 @@ def get_rss(
     rss = ET.Element("rss", version="2.0")
     channel = ET.SubElement(rss, "channel")
 
-    ET.SubElement(channel, "title").text = "News Feed"
+    ET.SubElement(channel, "title").text = "Mahbod's News Feed"
     ET.SubElement(channel, "link").text = f"{domain}/rss"
-    ET.SubElement(channel, "description").text = "Latest aggregated news"
+    ET.SubElement(channel, "description").text = "Latest news by your trusted sources"
     ET.SubElement(channel, "language").text = "en-us"
 
     for article in articles:
