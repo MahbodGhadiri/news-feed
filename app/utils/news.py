@@ -334,23 +334,26 @@ class NewsAggregatorTool:
         """Fetch all articles from the list of feeds."""
         all_entries = []
         for url in urls:
-            feed = feedparser.parse(url)
-            for entry in feed.entries:
-                published = entry.get("published", "") or entry.get("updated", "")
-                try:
-                    dt = date_parser.parse(published) if published else datetime.min
-                    dt_naive = dt.replace(tzinfo=None)
-                except Exception:
-                    dt_naive = datetime.min  # fallback if parsing fails
-                all_entries.append(
-                    {
-                        "title": entry.get("title", "No title"),
-                        "summary": entry.get("summary", ""),
-                        "link": entry.get("link", ""),
-                        "published": published,
-                        "published_parsed": dt_naive,
-                    }
-                )
+            try:
+                feed = feedparser.parse(url)
+                for entry in feed.entries:
+                    published = entry.get("published", "") or entry.get("updated", "")
+                    try:
+                        dt = date_parser.parse(published) if published else datetime.min
+                        dt_naive = dt.replace(tzinfo=None)
+                    except Exception:
+                        dt_naive = datetime.min  # fallback if parsing fails
+                    all_entries.append(
+                        {
+                            "title": entry.get("title", "No title"),
+                            "summary": entry.get("summary", ""),
+                            "link": entry.get("link", ""),
+                            "published": published,
+                            "published_parsed": dt_naive,
+                        }
+                    )
+            except:
+                self.logger.info(f"Failed to fetch entries for {url}")
         return all_entries
 
     def summarize_prep(self) -> str:

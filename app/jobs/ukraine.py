@@ -45,7 +45,7 @@ class UkraineSummary(AbstractCronJob):
                 properties={
                     "article": types.Schema(
                         type=types.Type.OBJECT,
-                        required=["title", "body", "source"],
+                        required=["title", "body"],
                         properties={
                             "title": types.Schema(type=types.Type.STRING),
                             "body": types.Schema(
@@ -96,4 +96,6 @@ class UkraineSummary(AbstractCronJob):
             scraper.get_source(),
             sent_to_telegram=True,
         )
+        print(headline)
         send_to_telegram(headline, self.topic)
+        return True

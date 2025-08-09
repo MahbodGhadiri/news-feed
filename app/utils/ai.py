@@ -39,9 +39,8 @@ class GeminiClient:
             "- sources (array of strings): valid links to the original news sources.",
             "Only include articles that contain at least one valid source link. If an article does not contain a valid link, ignore it.",
             "Write comprehensive summaries when possible, but do not include information not present in the input.",
-            "Ensure consistency and clarity throughout the output."
+            "Ensure consistency and clarity throughout the output.",
         ]
-
 
     def _default_schema(self) -> genai.types.Schema:
         return genai.types.Schema(

@@ -26,49 +26,48 @@ class NewsAggregator(AbstractCronJob):
         self.max_age_hours = max_age_hours
 
     async def run(self):
-        await self.news_pipeline()
+        return await self.news_pipeline()
 
     async def news_pipeline(self):
-        try:
-            self.logger.info(
-                f"⏳ Task started - aggregate {self.topic} news - max_age: {self.max_age_hours} hours and max_articles: {self.max_articles}"
-            )
-            aggregator = NewsAggregatorTool(f"app/rss-feed/{self.topic}.txt")
-            aggregator.filter_recent(
-                self.max_age_hours
-            ).filter_summary().filter_duplicates()
-            aggregator.score_by_keywords().limit_per_source(self.max_per_source)
-            if len(aggregator.entries) == 0:
-                self.logger.info("✅ done - no news found")
-                return
 
-            aggregator.weighted_selection(
-                self.max_weighted_selection
-            ).filter_duplicates().shuffle_and_slice(self.max_articles)
+        self.logger.info(
+            f"⏳ Task started - aggregate {self.topic} news - max_age: {self.max_age_hours} hours and max_articles: {self.max_articles}"
+        )
+        aggregator = NewsAggregatorTool(f"app/rss-feed/{self.topic}.txt")
+        aggregator.filter_recent(
+            self.max_age_hours
+        ).filter_summary().filter_duplicates()
+        aggregator.score_by_keywords().limit_per_source(self.max_per_source)
+        if len(aggregator.entries) == 0:
+            self.logger.info("✅ done - no news found")
+            return
 
-            summary_input = aggregator.summarize_prep()
+        aggregator.weighted_selection(
+            self.max_weighted_selection
+        ).filter_duplicates().shuffle_and_slice(self.max_articles)
 
-            if not summary_input.strip():
-                self.logger.info("✅ done - no news found")
-                return
+        summary_input = aggregator.summarize_prep()
 
-            llm_client = GeminiClient()
+        if not summary_input.strip():
+            self.logger.info("✅ done - no news found")
+            return
 
-            headlines = llm_client.generate(summary_input)["articles"]
+        llm_client = GeminiClient()
 
-            for headline in headlines:
-                try:
-                    self.article_service.create_article(
-                        headline["title"],
-                        headline["summary"],
-                        headline["sources"][0],
-                        sent_to_telegram=True,
-                    )
-                    send_to_telegram(headline, self.topic)
-                except Exception as e:
-                    self.logger.error("failed to send article")
-                    self.logger.error(e)
+        headlines = llm_client.generate(summary_input)["articles"]
 
-            self.logger.info(f"✅ Task Ended - aggregated {self.topic} news")
-        except Exception as e:
-            self.logger.error(f"News Pipeline failed: {e}")
+        for headline in headlines:
+            try:
+                self.article_service.create_article(
+                    headline["title"],
+                    headline["summary"],
+                    headline["sources"][0],
+                    sent_to_telegram=True,
+                )
+                send_to_telegram(headline, self.topic)
+            except Exception as e:
+                self.logger.error("failed to send article")
+                self.logger.error(e)
+
+        self.logger.info(f"✅ Task Ended - aggregated {self.topic} news")
+        return True
