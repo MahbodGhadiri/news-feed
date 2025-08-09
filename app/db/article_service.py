@@ -30,6 +30,30 @@ class ArticleService:
 
         cur.execute(
             """
+            DO $$
+            BEGIN
+                -- Add farsi_title column if it doesn't exist
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'articles' AND column_name = 'farsi_title'
+                ) THEN
+                    ALTER TABLE articles ADD COLUMN farsi_title TEXT NULL;
+                END IF;
+                
+                -- Add farsi_summary column if it doesn't exist
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'articles' AND column_name = 'farsi_summary'
+                ) THEN
+                    ALTER TABLE articles ADD COLUMN farsi_summary TEXT NULL;
+                END IF;
+            END
+            $$;
+        """
+        )
+
+        cur.execute(
+            """
             CREATE OR REPLACE FUNCTION update_updated_at_column()
             RETURNS TRIGGER AS $$
             BEGIN
@@ -53,22 +77,28 @@ class ArticleService:
         conn.commit()
         cur.close()
         conn.close()
-        self.logger.info("Article schema and triggers initialized.")
+        self.logger.info("Article schema and triggers initialized with auto-migration.")
 
     def create_article(
-        self, title: str, summary: str, source: str, sent_to_telegram=False
+        self,
+        title: str,
+        summary: str,
+        source: str,
+        sent_to_telegram=False,
+        farsi_title: str = None,
+        farsi_summary: str = None,
     ):
         conn = self.db_service.get_connection()
         cur = conn.cursor()
 
         cur.execute(
             """
-            INSERT INTO articles (title, summary, source, sent_to_telegram)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO articles (title, summary, source, sent_to_telegram, farsi_title, farsi_summary)
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT (title) DO NOTHING
             RETURNING id;
         """,
-            (title, summary, source, sent_to_telegram),
+            (title, summary, source, sent_to_telegram, farsi_title, farsi_summary),
         )
 
         row = cur.fetchone()
@@ -92,7 +122,7 @@ class ArticleService:
 
         cur.execute(
             """
-            SELECT id, title, summary, source, sent_to_telegram, created_at, updated_at
+            SELECT id, title, summary, source, sent_to_telegram, created_at, updated_at, farsi_title, farsi_summary
             FROM articles
             WHERE id = %s;
         """,
@@ -112,11 +142,20 @@ class ArticleService:
                 "sent_to_telegram": row[4],
                 "created_at": row[5].isoformat(),
                 "updated_at": row[6].isoformat(),
+                "farsi_title": row[7],
+                "farsi_summary": row[8],
             }
         return None
 
     def update_article(
-        self, article_id, title=None, summary=None, source=None, sent_to_telegram=None
+        self,
+        article_id,
+        title=None,
+        summary=None,
+        source=None,
+        sent_to_telegram=None,
+        farsi_title=None,
+        farsi_summary=None,
     ):
         conn = self.db_service.get_connection()
         cur = conn.cursor()
@@ -136,6 +175,12 @@ class ArticleService:
         if sent_to_telegram is not None:
             fields.append("sent_to_telegram = %s")
             values.append(sent_to_telegram)
+        if farsi_title is not None:
+            fields.append("farsi_title = %s")
+            values.append(farsi_title)
+        if farsi_summary is not None:
+            fields.append("farsi_summary = %s")
+            values.append(farsi_summary)
 
         if not fields:
             return False
@@ -177,7 +222,7 @@ class ArticleService:
         cur = conn.cursor()
 
         query = """
-            SELECT id, title, summary, source, sent_to_telegram, created_at
+            SELECT id, title, summary, source, sent_to_telegram, created_at, farsi_title, farsi_summary
             FROM articles
             WHERE 1=1
         """
@@ -188,9 +233,9 @@ class ArticleService:
             params.append(source)
 
         if search:
-            query += " AND (title ILIKE %s OR summary ILIKE %s)"
+            query += " AND (title ILIKE %s OR summary ILIKE %s OR farsi_title ILIKE %s OR farsi_summary ILIKE %s)"
             like_term = f"%{search}%"
-            params.extend([like_term, like_term])
+            params.extend([like_term, like_term, like_term, like_term])
 
         if start_date:
             query += " AND created_at >= %s"
@@ -216,6 +261,8 @@ class ArticleService:
                 "source": row[3],
                 "sent_to_telegram": row[4],
                 "created_at": row[5],
+                "farsi_title": row[6],
+                "farsi_summary": row[7],
             }
             for row in rows
         ]

@@ -25,22 +25,29 @@ class NewsAggregator(AbstractCronJob):
         self.max_articles = max_articles
         self.max_age_hours = max_age_hours
 
-    async def run(self):
-        return await self.news_pipeline()
+    def run(self):  # Changed from async to sync
+        """
+        Main job execution method - now synchronous to run in thread pool
+        """
+        return self.news_pipeline()
 
-    async def news_pipeline(self):
-
+    def news_pipeline(self):  # Changed from async to sync
+        """
+        Synchronous news aggregation pipeline
+        """
         self.logger.info(
             f"⏳ Task started - aggregate {self.topic} news - max_age: {self.max_age_hours} hours and max_articles: {self.max_articles}"
         )
+
         aggregator = NewsAggregatorTool(f"app/rss-feed/{self.topic}.txt")
         aggregator.filter_recent(
             self.max_age_hours
         ).filter_summary().filter_duplicates()
         aggregator.score_by_keywords().limit_per_source(self.max_per_source)
+
         if len(aggregator.entries) == 0:
             self.logger.info("✅ done - no news found")
-            return
+            return True
 
         aggregator.weighted_selection(
             self.max_weighted_selection
@@ -50,10 +57,9 @@ class NewsAggregator(AbstractCronJob):
 
         if not summary_input.strip():
             self.logger.info("✅ done - no news found")
-            return
+            return True
 
         llm_client = GeminiClient()
-
         headlines = llm_client.generate(summary_input)["articles"]
 
         for headline in headlines:
@@ -62,12 +68,16 @@ class NewsAggregator(AbstractCronJob):
                     headline["title"],
                     headline["summary"],
                     headline["sources"][0],
+                    farsi_title=headline["farsi_title"],
+                    farsi_summary=headline["farsi_summary"],
                     sent_to_telegram=True,
                 )
-                send_to_telegram(headline, self.topic)
+
+                send_to_telegram(headline, self.topic, locale="english")
+                send_to_telegram(headline, self.topic, locale="farsi")
+
             except Exception as e:
-                self.logger.error("failed to send article")
-                self.logger.error(e)
+                self.logger.error(f"Failed to send article: {e}")
 
         self.logger.info(f"✅ Task Ended - aggregated {self.topic} news")
         return True

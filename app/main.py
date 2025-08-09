@@ -105,7 +105,7 @@ async def start_scheduler():
     )  # every day
 
     ukraine_summary_job = UkraineSummary(
-        article_service, "30 9 * * *", "🇺🇦 Ukraine War Tracker"
+        article_service, "30 7 * * *", "🇺🇦 Ukraine War Tracker"
     )
 
     asyncio.create_task(general_news_job.start())

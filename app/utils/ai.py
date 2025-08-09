@@ -32,14 +32,17 @@ class GeminiClient:
         return [
             "You will be provided with a collection of news items formatted from RSS feeds.",
             "Your task is to summarize and polish the content you receive. Do not add or invent any new information.",
-            "All output must be in English.",
+            "All output must be in English and Farsi (Persian).",
             "The output should be in JSON format. Return an array of articles, where each article has the following fields:",
             "- title (string): a clear and concise English title.",
             "- summary (string): a polished and accurate English summary of the original content.",
+            "- farsi_title (string): a clear and concise Farsi translation of the English title.",
+            "- farsi_summary (string): a polished and accurate Farsi translation of the English summary.",
             "- sources (array of strings): valid links to the original news sources.",
             "Only include articles that contain at least one valid source link. If an article does not contain a valid link, ignore it.",
             "Write comprehensive summaries when possible, but do not include information not present in the input.",
             "Ensure consistency and clarity throughout the output.",
+            "For Farsi translations, use proper Persian grammar and vocabulary while maintaining the same meaning and tone as the English version.",
         ]
 
     def _default_schema(self) -> genai.types.Schema:
@@ -51,10 +54,22 @@ class GeminiClient:
                     type=genai.types.Type.ARRAY,
                     items=genai.types.Schema(
                         type=genai.types.Type.OBJECT,
-                        required=["title", "summary", "sources"],
+                        required=[
+                            "title",
+                            "summary",
+                            "farsi_title",
+                            "farsi_summary",
+                            "sources",
+                        ],
                         properties={
                             "title": genai.types.Schema(type=genai.types.Type.STRING),
                             "summary": genai.types.Schema(type=genai.types.Type.STRING),
+                            "farsi_title": genai.types.Schema(
+                                type=genai.types.Type.STRING
+                            ),
+                            "farsi_summary": genai.types.Schema(
+                                type=genai.types.Type.STRING
+                            ),
                             "sources": genai.types.Schema(
                                 type=genai.types.Type.ARRAY,
                                 items=genai.types.Schema(type=genai.types.Type.STRING),

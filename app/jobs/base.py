@@ -47,9 +47,9 @@ class AbstractCronJob(ABC):
                 )
 
     @abstractmethod
-    async def run(self) -> bool:
+    def run(self) -> bool:
         """
-        Implement in subclasses.
+        Implement in subclasses - synchronous method.
         Must return True if succeeded, False if failed.
         """
         pass
@@ -73,7 +73,9 @@ class AbstractCronJob(ABC):
                 self.logger.info(
                     f"[{self.job_name}] Attempt {attempt+1} ⏳ Starting scheduled job..."
                 )
-                success = await self.run()
+
+                success = await asyncio.to_thread(self.run)
+
                 duration = round(time.monotonic() - start_time, 2)
 
                 if success:
@@ -132,7 +134,8 @@ class AbstractCronJob(ABC):
                 )
 
                 await asyncio.sleep(wait_seconds)
-                await self._execute()
+                # Fire and forget
+                asyncio.create_task(self._execute())
 
         finally:
             if self.enable_metrics:
