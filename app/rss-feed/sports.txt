@@ -2,7 +2,12 @@ https://www.euronews.com/rss?format=mrss&level=theme&name=sport
 https://www.espn.com/espn/rss/soccer/news  
 https://www.nytimes.com/athletic/rss/soccer/  
 https://feeds.bbci.co.uk/sport/football/rss.xml  
-https://www.bundesliga.com/rss/en/rss-news.rss  
 https://e00-marca.uecdn.es/rss/futbol/primera-division.xml  
 https://www.transfermarkt.com/rss/news  
 https://www.sofascore.com/news/feed/ 
+https://www.bundesliga.com/rss/de/rss-news.rss
+https://www.mundodeportivo.com/rss/futbol/laliga
+https://www.laliga.com/en-GB/rss
+https://www.mundodeportivo.com/rss/futbol/fc-barcelona
+https://www.mundodeportivo.com/rss/futbol/real-madrid
+https://www.tz.de/sport/fc-bayern/rssfeed.rdf
