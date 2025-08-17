@@ -15,6 +15,11 @@ from app.utils.logger import setup_logger
 
 from app.jobs.news import NewsAggregator
 from app.jobs.ukraine import UkraineSummary
+from app.jobs.football import (
+    FootballWeekSummary,
+    FootballYesterdayResults,
+    FootballTodayGameNotification,
+)
 
 from app.db.base_service import BaseDatabaseService
 from app.db.article_service import ArticleService
@@ -108,12 +113,29 @@ async def start_scheduler():
         article_service, "30 7 * * *", "🇺🇦 Ukraine War Tracker"
     )
 
+    football_yesterday_recap_job = FootballYesterdayResults(
+        article_service, "30 8 * * *", "⚽ Football Yesterday Recap"
+    )
+
+    football_today_notification_job = FootballTodayGameNotification(
+        article_service, "35 8 * * *", "📢 Football Today Notification"
+    )
+
+    football_weekly_job = FootballWeekSummary(
+        article_service, "30 9 * * 4", "📅 Football Next Week Preview"
+    )
+
     asyncio.create_task(general_news_job.start())
     asyncio.create_task(sport_news_job.start())
     asyncio.create_task(defense_news_job.start())
     asyncio.create_task(environment_news_job.start())
     asyncio.create_task(tech_news_job.start())
     asyncio.create_task(programming_news_job.start())
+
     asyncio.create_task(ukraine_summary_job.start())
+
+    asyncio.create_task(football_yesterday_recap_job.start())
+    asyncio.create_task(football_today_notification_job.start())
+    asyncio.create_task(football_weekly_job.start())
 
     logger.info("✅ All jobs scheduled with staggered times.")

@@ -27,7 +27,9 @@ def build_rss_feed(articles, domain, locale="english"):
     else:  # English
         ET.SubElement(channel, "title").text = "Mahbod's News Feed"
         ET.SubElement(channel, "link").text = f"{domain}/rss"
-        ET.SubElement(channel, "description").text = "Latest news by your trusted sources"
+        ET.SubElement(channel, "description").text = (
+            "Latest news by your trusted sources"
+        )
         ET.SubElement(channel, "language").text = "en-us"
 
     for article in articles:
@@ -83,9 +85,9 @@ def get_rss(
 
     xml_str = build_rss_feed(articles, domain, locale="english")
     return Response(
-        content=xml_str, 
+        content=xml_str,
         media_type="application/rss+xml; charset=utf-8",
-        headers={"Content-Type": "application/rss+xml; charset=utf-8"}
+        headers={"Content-Type": "application/rss+xml; charset=utf-8"},
     )
 
 
@@ -113,7 +115,7 @@ def get_rss_farsi(
 
     xml_str = build_rss_feed(articles, domain, locale="farsi")
     return Response(
-        content=xml_str, 
+        content=xml_str,
         media_type="application/rss+xml; charset=utf-8",
-        headers={"Content-Type": "application/rss+xml; charset=utf-8"}
+        headers={"Content-Type": "application/rss+xml; charset=utf-8"},
     )

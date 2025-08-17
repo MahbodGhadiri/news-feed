@@ -17,7 +17,7 @@ class UkraineSummary(AbstractCronJob):
         self.topic = "ukraine_war_daily_update"
         self.article_service = article_service
 
-    def run(self): 
+    def run(self):
         """
         Synchronous run method for thread execution
         """
